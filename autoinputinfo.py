@@ -1,6 +1,12 @@
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
+from io import BytesIO
+import zipfile
+import shutil
+from xml.etree import ElementTree as ET
+
+
 import os
 folder_path = r'C:\Users\Administrator\Desktop\autoInputFile'
 pl_keywords = 'pi&inv'
@@ -41,10 +47,6 @@ if not info_file:
 else:
     print(f"找到体积重量信息文件文件：{info_file}")
 
-# 创建保存图片的文件夹
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
 
 pl_sheets = pd.read_excel(pl_file, sheet_name=None)  # 返回字典形式 {工作表名: DataFrame}
 
@@ -65,25 +67,102 @@ except PermissionError:
     print(f"请关闭需要合并的文件:{info_file} 后重试")
     os.system("pause")
 
- # 提取图片并记录锚点
-images = []
-if hasattr(wi, '_images'):  # 检查是否存在图片
-    for img_index, img in enumerate(wi._images, start=1):
-        image_name = f"image_{img_index}.png"
-        image_path = os.path.join(output_folder, image_name)
-        with open(image_path, 'wb') as f:
-            f.write(img.ref.blob)  # 保存图片二进制数据
-        images.append((img.anchor, image_path))  # 保存图片位置和路径
-        print(f"图片已提取并保存到：{image_path}")   
 
 
-# 删除图片对象（从 Excel 中移除图片）
-wi._images = []  # 清空图片列表
-print("所有图片已从 Excel 文件中移除。")
+
+# 图片获取操作 要记录位置 ------------------------------------
+# confirm if the output folder exist
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# 解压 Excel 文件
+with zipfile.ZipFile(pl_file, 'r') as zip_ref:
+    zip_ref.extractall(output_folder)
+print(f"文件已解压到：{output_folder}")
+
+# 动态获取命名空间
+def get_namespaces(xml_file):
+    namespaces = {}
+    events = ("start", "start-ns")
+    for event, elem in ET.iterparse(xml_file, events):
+        if event == "start-ns":
+            prefix, uri = elem
+            namespaces[prefix] = uri
+    return namespaces
+
+extracted_folder = r'C:\Users\Administrator\Desktop\extracted_images'
+
+
+# 文件夹路径
+drawing_folder = os.path.join(extracted_folder, 'xl', 'drawings')
+rels_folder = os.path.join(drawing_folder, '_rels')
+media_folder = os.path.join(extracted_folder, 'xl', 'media')
+
+# 保存图片位置与文件名的映射
+image_positions = []
+
+# 遍历绘图文件夹中的 XML 文件
+for drawing_file in os.listdir(drawing_folder):
+    if drawing_file.endswith('.xml'):
+        drawing_path = os.path.join(drawing_folder, drawing_file)
+        print(f"正在处理绘图文件：{drawing_path}")
+
+        # 解析 XML
+        tree = ET.parse(drawing_path)
+        root = tree.getroot()
+
+        # 动态获取命名空间
+        namespaces = {
+            "xdr": "http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing",
+            "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
+            "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+        }
+
+        # 加载对应的 .rels 文件
+        rels_file = os.path.join(rels_folder, drawing_file.replace('.xml', '.xml.rels'))
+        if not os.path.exists(rels_file):
+            print(f"未找到对应的 .rels 文件：{rels_file}")
+            continue
+
+        # 解析 .rels 文件
+        rels_tree = ET.parse(rels_file)
+        rels_root = rels_tree.getroot()
+        embed_to_image = {}
+        for rel in rels_root.findall("Relationship"):
+            embed_id = rel.attrib["Id"]
+            target = rel.attrib["Target"]
+            if target.startswith("../media/"):
+                image_file = target.split("/")[-1]
+                embed_to_image[embed_id] = image_file
+
+        # 遍历 xdr:twoCellAnchor 节点
+        for anchor in root.findall("xdr:twoCellAnchor", namespaces):
+            # 获取起始位置
+            from_node = anchor.find("xdr:from", namespaces)
+            to_node = anchor.find("xdr:to", namespaces)
+            if from_node is not None and to_node is not None:
+                row = int(from_node.find("xdr:row", namespaces).text) + 1
+                col = int(from_node.find("xdr:col", namespaces).text) + 1
+
+                # 查找图片
+                blip = anchor.find(".//a:blip", namespaces)
+                if blip is not None:
+                    embed_id = blip.attrib.get(f"{{{namespaces['r']}}}embed")
+                    if embed_id in embed_to_image:
+                        image_file = embed_to_image[embed_id]
+                        image_positions.append((row, col, image_file))
+                        print(f"图片位置解析成功：行={row}, 列={col}, 文件={image_file}")
+
+# 打印解析结果
+print("图片与单元格对应关系：")
+for position in image_positions:
+    print(position)
+# # ----------------------------------------------------------------------------------
 
 
 # 获取合并单元格的范围
 merged_ranges = ws.merged_cells.ranges
+
 
 
 # 从第 9 行开始（索引为 7）
@@ -120,31 +199,37 @@ for i in range(7, len(pl_df)):
             ws.cell(row=i + 2, column=16, value=height)
         print(f"第 {i + 2} 行更新完成")
 
-# 重新插入图片
-for anchor, img_path in images:
-    img = Image(img_path)
-    ws.add_image(img, anchor)  # 按原位置插入图片
-    print(f"图片已重新插入到单元格：{anchor}")
+
 
 print("修改完成，即将保存...")
 
-# 保存文件
-try:
-    wb.save(pl_file)
-    print(f"体积重量已保存至文件：{pl_file}")
-except PermissionError:
-    print(f"无法保存文件。请关闭文件：{pl_file} 后重试。")
+# 保存修改后的文件（暂时没有图片）
+temp_file = pl_file.replace('.xlsx', '_temp.xlsx')
+wb.save(temp_file)
+print(f"修改后的文件已暂存为：{temp_file}")
 
-# 删除提取的图片文件
-for anchor, img_path in images:
+# 重新插入图片
+wb = load_workbook(temp_file)
+ws = wb.active
+for row, col, image_file in image_positions:
+    img_path = os.path.join(media_folder, image_file)
     if os.path.exists(img_path):
-        os.remove(img_path)
-        print(f"已删除临时图片文件：{img_path}")
+        img = Image(img_path)
+        cell = ws.cell(row=row, column=col)
+        ws.add_image(img, cell.coordinate)  # 按单元格重新插入图片
+        print(f"图片 {image_file} 已重新插入到单元格 {cell.coordinate}")
 
-# 删除图片保存文件夹（如果为空）
-if os.path.exists(output_folder) and not os.listdir(output_folder):
-    os.rmdir(output_folder)
-    print(f"已删除临时文件夹：{output_folder}")
+
+
+# 清理临时文件
+os.remove(temp_file)
+shutil.rmtree(output_folder)
+print(f"已删除临时文件夹：{output_folder}")
+
+wb.save(pl_file)
+print(f"修改后的文件已保存到：{pl_file}")
+
+
 
 os.system("pause")
 
