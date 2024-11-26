@@ -58,10 +58,15 @@ ws = wb[sheet_to_fill]
 
 # **获取信息文件中的目标列**
 # 提取全局信息
-orderIdentifier= info_df.iloc[0]["单据编号  (1)"]
-clientName = info_df.iloc[0]["客户名称  (103)"]
-info_df = pd.read_excel(info_file, dtype={"客户  (2)": str})
-clientNumber = info_df.iloc[0]["客户  (2)"]
+try:
+    orderIdentifier= info_df.iloc[0]["单据编号  (1)"]
+    clientName = info_df.iloc[0]["客户名称  (103)"]
+    info_df = pd.read_excel(info_file, dtype={"客户  (2)": str})
+    clientNumber = info_df.iloc[0]["客户  (2)"]
+except KeyError:
+    print("请提供正确的信息文件")
+    os.system("pause")
+
 # 确保输出目录存在
 output_folder = os.path.join(folder_path, "output")
 if not os.path.exists(output_folder):
