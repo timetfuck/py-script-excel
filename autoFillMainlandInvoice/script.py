@@ -54,11 +54,13 @@ ws = wb.active  # 默认选择第一个工作表
 # 提取全局信息
 orderIdentifier= info_df.iloc[0]["单据编号  (1)"]
 clientName = info_df.iloc[0]["客户名称  (103)"]
+info_df = pd.read_excel(info_file, dtype={"客户  (2)": str})
+clientNumber = info_df.iloc[0]["客户  (2)"]
 # 确保输出目录存在
 output_folder = os.path.join(folder_path, "output")
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
-output_file = os.path.join(output_folder, f"filled_template_{timestamp}.xlsx")
+output_file = os.path.join(output_folder, f"{clientNumber} {orderIdentifier} {clientName} {timestamp}.xlsx")
 
 recepient = {"收件人：": clientName}
 orderIdentifierDic = {"订单号：": orderIdentifier}
@@ -100,40 +102,56 @@ def fill_template_with_material_info(ws, material_data, output_file):
             ws[f"A{current_row}"] = row_number
             # set number of order alignent to center
             ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
-            ws[f"B{current_row}"] = row["物料编码  (7)"]
+            ws[f"A{current_row}"].border = round_thin_border 
+
+            ws[f"B{current_row}"] = row["物料编码  (7)"][5:]
             ws[f'B{current_row}'].alignment = Alignment(vertical='center')
             ws[f"B{current_row}"].border = round_thin_border 
             #set width of coloum to 30
             ws.column_dimensions['B'].width = 30  #列宽为30
-            ws[f"C{current_row}"] = row["物料名称  (8)"]
+            ws[f"C{current_row}"] = row["物料名称  (8)"].replace("/有图片","")
+            ws[f"C{current_row}"].border = round_thin_border 
+            ws[f'C{current_row}'].alignment = Alignment(vertical='center')
+
             ws[f"E{current_row}"] = row["品牌  (14)"]
+            ws[f"E{current_row}"].border = round_thin_border 
+            ws[f'E{current_row}'].alignment = Alignment(vertical='center')
+
             ws[f"F{current_row}"] = row["数量  (13)"]
             ws[f'F{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f"F{current_row}"].border = round_thin_border 
 
             ws[f"G{current_row}"] = row["单位  (15)"]
             ws[f'G{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f"G{current_row}"].border = round_thin_border 
 
             ws[f"H{current_row}"] = row["单价  (27)"]
             ws[f"H{current_row}"].number_format = gn_number_format 
             ws[f'H{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f"H{current_row}"].border = round_thin_border 
 
             ws[f"I{current_row}"] = row["不含税金额  (29)"]
             ws[f"I{current_row}"].number_format = gn_number_format
             ws[f'I{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f"I{current_row}"].border = round_thin_border 
 
             ws[f"J{current_row}"] = row["特殊要求及其他  (16)"]
         else:
             ws[f"H{current_row}"] = "金额"  
+            ws[f"H{current_row}"].border = round_thin_border 
             ws[f"H{current_row}"].font = Font(size=16, bold=True)  
             ws[f"H{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
+
             ws[f"I{current_row}"].value = f"=sum(I{start_row}:I{current_row - 1})" 
             ws[f"I{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
             ws[f"I{current_row}"].font = Font(size=16, bold=True)  
             ws[f"I{current_row}"].number_format = '¥#,##0.00' 
+            ws[f"I{current_row}"].border = round_thin_border 
             
             ws[f"F{current_row}"].value = f"=sum(F{start_row}:F{current_row - 1})" 
             ws[f"F{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
             ws[f"F{current_row}"].font = Font(size=16, bold=True)  
+            ws[f"F{current_row}"].border = round_thin_border 
             
       # 插入图片
         matching_image = {}
@@ -144,6 +162,7 @@ def fill_template_with_material_info(ws, material_data, output_file):
         if matching_image:
             img_path = matching_image["image_path"]
             if os.path.exists(img_path):  # 确保图片文件存在
+                ws[f"D{current_row}"].border = round_thin_border 
                 insert_image_in_cell(ws, img_path,"D", current_row)
         current_row += 1  # 移动到下一行
 
