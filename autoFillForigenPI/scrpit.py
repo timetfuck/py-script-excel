@@ -20,6 +20,9 @@ sheet_to_fill = 'PI'
 timestamp = datetime.now().strftime("%Y.%m.%d")
 timestampForSheet = datetime.now().strftime("%b.%d.%Y")
 
+print("把信息文件放入后必须关闭原文件！")
+os.system("pause")
+
 
 
 # 检查 template 文件夹是否存在

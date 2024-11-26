@@ -2,11 +2,12 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 import os
-from until import find_file, xlsx_floating_images, get_cell_size, insert_image_in_cell, find_global_value_name_and_fill
+from until import find_file, xlsx_floating_images, get_cell_size, insert_image_in_cell, find_global_value_name_and_fill, delete_files_in_directory
 from datetime import datetime
 from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 from style import round_thin_border
+
 
 # get work path
 folder_path = os.path.dirname(os.path.abspath(__file__))
@@ -60,7 +61,7 @@ clientNumber = info_df.iloc[0]["客户  (2)"]
 output_folder = os.path.join(folder_path, "output")
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
-output_file = os.path.join(output_folder, f"{clientNumber} {orderIdentifier} {clientName} {timestamp}.xlsx")
+output_file = os.path.join(output_folder, f"{clientNumber} {orderIdentifier} {clientName} 国内清单 {timestamp}.xlsx")
 
 recepient = {"收件人：": clientName}
 orderIdentifierDic = {"订单号：": orderIdentifier}
@@ -174,4 +175,7 @@ fill_template_with_material_info(ws, material_data, output_file)
 
 # 保存文件
 wb.save(output_file)
+delete_files_in_directory(output_image_folder)
+os.removedirs(output_image_folder)
+
 
