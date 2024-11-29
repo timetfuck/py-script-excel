@@ -19,6 +19,10 @@ output_image_folder =  os.path.join(folder_path, "image")
 # 自动生成带时间戳的新文件名
 timestamp = datetime.now().strftime("%Y.%m.%d")
 
+print("把信息文件放入后必须关闭原文件！")
+os.system("pause")
+
+
 
 # 检查 template 文件夹是否存在
 if not os.path.exists(template_path):
@@ -174,6 +178,8 @@ def fill_template_with_material_info(ws, material_data, output_file):
     print(f"数据已成功写入并保存到 {output_file}")
 
 # 主程序
+print("准备开始...")
+os.system("pause")
 material_data = read_material_info(info_file)
 fill_template_with_material_info(ws, material_data, output_file)
 

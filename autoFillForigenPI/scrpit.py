@@ -55,6 +55,7 @@ info_df = pd.read_excel(info_file)
 # 加载模板文件 (template)
 wb = load_workbook(template_file)
 ws = wb[sheet_to_fill] 
+wpl = wb["PL"]
 
 # **获取信息文件中的目标列**
 # 提取全局信息
@@ -75,11 +76,15 @@ output_file = os.path.join(output_folder, f"{clientNumber} {orderIdentifier} {cl
 
 recepient = {"TO:": clientName}
 orderIdentifierDic = {"INV.NO:": orderIdentifier}
-timeDic = {"Date:": timestamp}
+timeDic = {"Date:": timestampForSheet}
 
 find_global_value_name_and_fill(ws, recepient)
 find_global_value_name_and_fill(ws, orderIdentifierDic)
 find_global_value_name_and_fill(ws, timeDic)
+
+find_global_value_name_and_fill(wpl, recepient)
+find_global_value_name_and_fill(wpl, orderIdentifierDic)
+find_global_value_name_and_fill(wpl, timeDic)
 
 images_info = xlsx_floating_images(info_file, output_image_folder)
 print(images_info)
@@ -118,22 +123,22 @@ def fill_template_with_material_info(ws, material_data, output_file):
             ws[f"A{current_row}"].border = round_thin_border 
 
             ws[f"B{current_row}"] = row["物料编码  (7)"]
-            ws[f'B{current_row}'].alignment = Alignment(vertical='center')
+            ws[f'B{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
             ws[f"B{current_row}"].border = round_thin_border 
 
             ws[f"C{current_row}"] = row["物料编码  (7)"][5:]
-            ws[f'C{current_row}'].alignment = Alignment(vertical='center')
+            ws[f'C{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
             ws[f"C{current_row}"].border = round_thin_border 
 
             ws[f"D{current_row}"] = row["物料名称  (8)"].replace("/有图片","")
             ws[f"D{current_row}"].border = round_thin_border 
-            ws[f'D{current_row}'].alignment = Alignment(vertical='center')
+            ws[f'D{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
 
          
 
             ws[f"E{current_row}"] = row["英文名  (11)"]
             ws[f"E{current_row}"].border = round_thin_border 
-            ws[f'E{current_row}'].alignment = Alignment(vertical='center')
+            ws[f'E{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
 
             ws[f"G{current_row}"] = row["品牌  (14)"]
             ws[f"G{current_row}"].border = round_thin_border 
@@ -158,6 +163,7 @@ def fill_template_with_material_info(ws, material_data, output_file):
             ws[f"K{current_row}"].border = round_thin_border 
 
             ws[f"L{current_row}"] = row["特殊要求及其他  (16)"]
+
         else:
             ws[f"J{current_row}"] = "TOTAL"  
             ws[f"J{current_row}"].border = round_thin_border 
