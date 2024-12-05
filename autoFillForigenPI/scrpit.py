@@ -121,65 +121,76 @@ def fill_template_with_material_info(ws, material_data, output_file):
             # set number of order alignent to center
             ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"A{current_row}"].border = round_thin_border 
+            ws[f"A{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
+
 
             ws[f"B{current_row}"] = row["物料编码  (7)"]
             ws[f'B{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
             ws[f"B{current_row}"].border = round_thin_border 
+            ws[f"B{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"C{current_row}"] = row["物料编码  (7)"][5:]
             ws[f'C{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
             ws[f"C{current_row}"].border = round_thin_border 
+            ws[f"C{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"D{current_row}"] = row["物料名称  (8)"].replace("/有图片","")
             ws[f"D{current_row}"].border = round_thin_border 
             ws[f'D{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
+            ws[f"D{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
          
 
             ws[f"E{current_row}"] = row["英文名  (11)"]
             ws[f"E{current_row}"].border = round_thin_border 
             ws[f'E{current_row}'].alignment = Alignment(vertical='center', wrap_text=True)
+            ws[f"E{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"G{current_row}"] = row["品牌  (14)"]
             ws[f"G{current_row}"].border = round_thin_border 
             ws[f'G{current_row}'].alignment = Alignment(vertical='center')
+            ws[f"G{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"H{current_row}"] = row["数量  (13)"]
             ws[f'H{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"H{current_row}"].border = round_thin_border 
+            ws[f"H{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"I{current_row}"] = row["单位  (15)"]
             ws[f'I{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"I{current_row}"].border = round_thin_border 
+            ws[f"I{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"J{current_row}"] = row["单价  (27)"]
-            ws[f"J{current_row}"].number_format = gn_number_format 
             ws[f'J{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"J{current_row}"].border = round_thin_border 
+            ws[f"J{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"K{current_row}"] = row["不含税金额  (29)"]
             ws[f"K{current_row}"].number_format = gn_number_format
             ws[f'K{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"K{current_row}"].border = round_thin_border 
+            ws[f"K{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
             ws[f"L{current_row}"] = row["特殊要求及其他  (16)"]
+            ws[f"K{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
         else:
             ws[f"J{current_row}"] = "TOTAL"  
             ws[f"J{current_row}"].border = round_thin_border 
-            ws[f"J{current_row}"].font = Font(size=16, bold=True)  
             ws[f"J{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
+            ws[f"J{current_row}"].font = Font(name="Calibri", size=16, bold=True)  # Set font to Calibri with size 16
 
             ws[f"K{current_row}"].value = f"=sum(K{start_row}:K{current_row - 1})" 
             ws[f"K{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
-            ws[f"K{current_row}"].font = Font(size=16, bold=True)  
             ws[f"K{current_row}"].number_format = '¥#,##0.00' 
             ws[f"K{current_row}"].border = round_thin_border 
+            ws[f"K{current_row}"].font = Font(name="Calibri", size=16, bold=True)  # Set font to Calibri with size 16
             
             ws[f"H{current_row}"].value = f"=sum(H{start_row}:H{current_row - 1})" 
             ws[f"H{current_row}"].alignment = Alignment(horizontal="center", vertical="center") 
-            ws[f"H{current_row}"].font = Font(size=16, bold=True)  
             ws[f"H{current_row}"].border = round_thin_border 
+            ws[f"H{current_row}"].font = Font(name="Calibri", size=16, bold=True)  # Set font to Calibri with size 16
             
       # 插入图片
         matching_image = {}
