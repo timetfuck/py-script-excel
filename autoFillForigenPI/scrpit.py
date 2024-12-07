@@ -100,6 +100,8 @@ def read_material_info(info_file):
     print(material_data)
     return material_data
 
+
+
 # 动态插入行并写入数据
 def fill_template_with_material_info(ws, material_data, output_file):
     gn_number_format ='¥#,##0.00'  
@@ -204,15 +206,27 @@ def fill_template_with_material_info(ws, material_data, output_file):
                 ws[f"F{current_row}"].border = round_thin_border 
                 insert_image_in_cell(ws, img_path,"F", current_row)
         current_row += 1  # 移动到下一行
-
+        end_row_for_auto_caculate_where_is_the_goods = current_row
     print(f"数据已成功写入并保存到 {output_file}")
+    return current_row
+
 
 # 主程序
+start_row_for_auto_caculate_where_is_the_goods = 9
+end_row_for_auto_caculate_where_is_the_goods = 0
 print("准备开始制作")
 os.system("pause")
 print("制作表单中....")
 material_data = read_material_info(info_file)
-fill_template_with_material_info(ws, material_data, output_file)
+
+end_row_for_auto_caculate_where_is_the_goods = fill_template_with_material_info(ws, material_data, output_file)
+
+end_row_for_auto_caculate_where_is_the_goods += 10
+
+formula = f'=IF(A8<>"",TEXTJOIN(" ",TRUE,FILTER(PL!$H$8:$H${end_row_for_auto_caculate_where_is_the_goods},PL!$C$8:$C${end_row_for_auto_caculate_where_is_the_goods}=A8)),"")'
+
+
+ws[f"M{8}"].value = formula
 
 # 保存文件
 wb.save(output_file)
