@@ -95,7 +95,7 @@ def read_material_info(info_file):
     material_data = info_df[[
         "单据行号  (6)", "物料编码  (7)", "物料名称  (8)", "英文名  (11)",
         "系统图片  (12)", "品牌  (14)", "数量  (13)", "单位  (15)",
-        "单价  (27)", "不含税金额  (29)", "特殊要求及其他  (16)"
+        "单价  (27)", "金额  (29)", "特殊要求及其他  (16)"
     ]].fillna("")
     print(material_data)
     return material_data
@@ -168,7 +168,7 @@ def fill_template_with_material_info(ws, material_data, output_file):
             ws[f"J{current_row}"].border = round_thin_border 
             ws[f"J{current_row}"].font = Font(name="Calibri", size=12)  # Set font to Calibri with size 12
 
-            ws[f"K{current_row}"] = row["不含税金额  (29)"]
+            ws[f"K{current_row}"] = row["金额  (29)"]
             ws[f"K{current_row}"].number_format = gn_number_format
             ws[f'K{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws[f"K{current_row}"].border = round_thin_border 
